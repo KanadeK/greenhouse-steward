@@ -36,6 +36,7 @@ dependencies = [
   "python-multipart==0.0.32",
   "rich==15.0.0",
   "typer==0.27.0",
+  "tzdata==2026.3",
   "uvicorn==0.51.0",
 ]
 

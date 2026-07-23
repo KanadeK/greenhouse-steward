@@ -1,0 +1,115 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "greenhouse-steward"
+version = "0.1.0"
+description = "A local-first foundation for observable greenhouse monitoring and guidance."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+  { name = "KanadeK" },
+]
+keywords = ["greenhouse", "horticulture", "mqtt", "monitoring", "local-first"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Environment :: Web Environment",
+  "Framework :: FastAPI",
+  "Intended Audience :: End Users/Desktop",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Home Automation",
+  "Typing :: Typed",
+]
+dependencies = [
+  "fastapi==0.139.2",
+  "httpx==0.28.1",
+  "jinja2==3.1.6",
+  "paho-mqtt==2.1.0",
+  "plotly==6.9.0",
+  "pydantic==2.13.4",
+  "python-multipart==0.0.32",
+  "rich==15.0.0",
+  "typer==0.27.0",
+  "uvicorn==0.51.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "build==1.5.0",
+  "mypy==2.3.0",
+  "pip-audit==2.10.1",
+  "pytest==9.1.1",
+  "pytest-cov==7.1.0",
+  "ruff==0.15.22",
+]
+
+[project.urls]
+Homepage = "https://github.com/KanadeK/greenhouse-steward"
+Issues = "https://github.com/KanadeK/greenhouse-steward/issues"
+Repository = "https://github.com/KanadeK/greenhouse-steward"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = [
+  "-ra",
+  "--strict-config",
+  "--strict-markers",
+  "--cov=greenhouse_steward",
+  "--cov-branch",
+  "--cov-report=term-missing",
+  "--cov-report=xml",
+  "--cov-fail-under=80",
+]
+minversion = "9.1"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "scripts", "tests"]
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["greenhouse_steward"]
+
+[tool.ruff.format]
+docstring-code-format = true
+line-ending = "lf"
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+files = ["src", "scripts"]
+strict = true
+warn_unreachable = true
+pretty = true
+
+[tool.coverage.run]
+branch = true
+source = ["greenhouse_steward"]
+
+[tool.coverage.report]
+exclude_also = [
+  "if TYPE_CHECKING:",
+  "if __name__ == .__main__.:",
+]
+fail_under = 80
+show_missing = true
+skip_covered = true
+
+[tool.coverage.xml]
+output = "coverage.xml"

@@ -1,0 +1,87 @@
+name: Bug report
+description: Report reproducible incorrect behavior in Greenhouse Steward
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for providing a reproducible report. Remove credentials,
+        private measurements, addresses, and broker details before submitting.
+        Security-sensitive reports belong in a private GitHub Security Advisory.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Provide the installed version or full commit identifier.
+      example: "0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Other Unix-like system
+    validations:
+      required: true
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      description: Paste the output of `python --version`.
+      example: "Python 3.12.10"
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Observed behavior
+      description: Explain what happened and why it appears incorrect.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Explain the result you expected and the basis for that expectation.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Provide the smallest deterministic sequence and sanitized input.
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Sanitized logs or error output
+      description: Use a code block and remove all secrets and private sensor data.
+      render: shell
+  - type: dropdown
+    id: physical-equipment
+    attributes:
+      label: Was physical greenhouse equipment connected?
+      options:
+        - "No"
+        - "Yes, but Greenhouse Steward could not control it"
+        - "Yes, through an external integration"
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched existing issues for the same behavior.
+          required: true
+        - label: I removed credentials and private operational data.
+          required: true
+        - label: This report does not require confidential security handling.
+          required: true

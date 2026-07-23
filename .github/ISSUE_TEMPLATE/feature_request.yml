@@ -1,0 +1,74 @@
+name: Feature request
+description: Propose a focused capability or design improvement
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the operator problem before describing an implementation.
+        Proposals involving remote data transfer or physical actuation must
+        include privacy, threat, and failure analysis.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Operator problem
+      description: Who encounters the problem, in what setting, and what is the impact?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe observable success without prescribing internal code structure.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include manual workflows or existing tools that partly solve the problem.
+    validations:
+      required: true
+  - type: dropdown
+    id: data-boundary
+    attributes:
+      label: Does this change where data is stored or transmitted?
+      options:
+        - "No"
+        - "Yes"
+        - "Uncertain"
+    validations:
+      required: true
+  - type: dropdown
+    id: actuation-boundary
+    attributes:
+      label: Could this influence or control physical equipment?
+      options:
+        - "No"
+        - "Yes"
+        - "Uncertain"
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: Privacy, security, and safety effects
+      description: Identify new data, network access, credentials, failure modes, and mitigations.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting evidence
+      description: Link public standards or provide sanitized examples where useful.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched existing issues and discussions for this request.
+          required: true
+        - label: I have not included credentials or private greenhouse data.
+          required: true

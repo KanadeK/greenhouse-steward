@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "device_id": "esp32-synthetic-01",
+  "timestamp": "2026-07-23T08:00:00Z",
+  "readings": {
+    "temperature_c": 24.25,
+    "humidity_pct": 61.5,
+    "soil_moisture_pct": 47.0,
+    "light_lux": 18000.0
+  }
+}

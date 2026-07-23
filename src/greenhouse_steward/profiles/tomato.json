@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "profile": {
+    "slug": "tomato",
+    "display_name": "Tomato",
+    "targets": {
+      "temperature_c": {
+        "low": 18.0,
+        "high": 28.0
+      },
+      "humidity_pct": {
+        "low": 55.0,
+        "high": 75.0
+      },
+      "soil_moisture_pct": {
+        "low": 40.0,
+        "high": 70.0
+      },
+      "light_lux": {
+        "low": 10000.0,
+        "high": 50000.0
+      }
+    },
+    "watering": {
+      "trigger_below_pct": 40.0,
+      "stop_at_pct": 55.0,
+      "suggested_duration_seconds": 10
+    },
+    "required_metrics": [
+      "temperature_c",
+      "humidity_pct",
+      "soil_moisture_pct",
+      "light_lux"
+    ]
+  },
+  "safety": {
+    "offline_after_seconds": 300,
+    "future_tolerance_seconds": 30,
+    "relay_max_on_seconds": 30
+  },
+  "anomaly": {
+    "metrics": {
+      "temperature_c": {
+        "min_samples": 6,
+        "window_size": 24,
+        "zscore_threshold": 3.5,
+        "flat_baseline_delta": 5.0,
+        "max_rate_per_minute": 4.0
+      },
+      "humidity_pct": {
+        "min_samples": 6,
+        "window_size": 24,
+        "zscore_threshold": 3.5,
+        "flat_baseline_delta": 15.0,
+        "max_rate_per_minute": 15.0
+      },
+      "soil_moisture_pct": {
+        "min_samples": 6,
+        "window_size": 24,
+        "zscore_threshold": 3.5,
+        "flat_baseline_delta": 15.0,
+        "max_rate_per_minute": 12.0
+      },
+      "light_lux": {
+        "min_samples": 6,
+        "window_size": 24,
+        "zscore_threshold": 3.5,
+        "flat_baseline_delta": 20000.0,
+        "max_rate_per_minute": 30000.0
+      }
+    }
+  }
+}

@@ -61,6 +61,13 @@ package-dir = { "" = "src" }
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+greenhouse_steward = [
+  "profiles/*.json",
+  "sample_data/data/*.csv",
+  "sample_data/data/*.json",
+]
+
 [tool.pytest.ini_options]
 addopts = [
   "-ra",

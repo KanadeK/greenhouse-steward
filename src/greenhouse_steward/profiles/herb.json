@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "profile": {
+    "slug": "herb",
+    "display_name": "Culinary herbs",
+    "targets": {
+      "temperature_c": {
+        "low": 16.0,
+        "high": 27.0
+      },
+      "humidity_pct": {
+        "low": 45.0,
+        "high": 70.0
+      },
+      "soil_moisture_pct": {
+        "low": 35.0,
+        "high": 65.0
+      },
+      "light_lux": {
+        "low": 8000.0,
+        "high": 35000.0
+      }
+    },
+    "watering": {
+      "trigger_below_pct": 35.0,
+      "stop_at_pct": 50.0,
+      "suggested_duration_seconds": 8
+    },
+    "required_metrics": [
+      "temperature_c",
+      "humidity_pct",
+      "soil_moisture_pct",
+      "light_lux"
+    ]
+  },
+  "safety": {
+    "offline_after_seconds": 300,
+    "future_tolerance_seconds": 30,
+    "relay_max_on_seconds": 30
+  },
+  "anomaly": {
+    "metrics": {
+      "temperature_c": {
+        "min_samples": 6,
+        "window_size": 24,
+        "zscore_threshold": 3.5,
+        "flat_baseline_delta": 5.0,
+        "max_rate_per_minute": 4.0
+      },
+      "humidity_pct": {
+        "min_samples": 6,
+        "window_size": 24,
+        "zscore_threshold": 3.5,
+        "flat_baseline_delta": 15.0,
+        "max_rate_per_minute": 15.0
+      },
+      "soil_moisture_pct": {
+        "min_samples": 6,
+        "window_size": 24,
+        "zscore_threshold": 3.5,
+        "flat_baseline_delta": 15.0,
+        "max_rate_per_minute": 12.0
+      },
+      "light_lux": {
+        "min_samples": 6,
+        "window_size": 24,
+        "zscore_threshold": 3.5,
+        "flat_baseline_delta": 20000.0,
+        "max_rate_per_minute": 30000.0
+      }
+    }
+  }
+}

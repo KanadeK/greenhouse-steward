@@ -22,6 +22,7 @@ env/
 coverage.xml
 htmlcov/
 .pytest_cache/
+.pytest-tmp*/
 .mypy_cache/
 .ruff_cache/
 
@@ -29,12 +30,13 @@ htmlcov/
 .env
 .env.*
 !.env.example
+firmware/esp32_synthetic/secrets.h
 *.pem
 *.key
 
 # Local application state
-data/
-instance/
+/data/
+/instance/
 *.db
 *.db-shm
 *.db-wal

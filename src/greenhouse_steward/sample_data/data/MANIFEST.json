@@ -1,0 +1,26 @@
+{
+  "files": {
+    "herb-7d.csv": {
+      "days": 7,
+      "device_id": "sample-herb",
+      "interval_minutes": 15,
+      "profile_slug": "herb",
+      "rows": 672,
+      "seed": 3502,
+      "sha256": "a3b28e772a74a81f49d3b7a981862b99de1a7eef35eac5f2d9c429f10d6e90e8",
+      "start": "2026-01-05T00:00:00Z"
+    },
+    "tomato-7d.csv": {
+      "days": 7,
+      "device_id": "sample-tomato",
+      "interval_minutes": 15,
+      "profile_slug": "tomato",
+      "rows": 672,
+      "seed": 3501,
+      "sha256": "15ab86195c36f83620a950d9237f23c15b9b557ce6b6137e8aab31a3e97cacd4",
+      "start": "2026-01-05T00:00:00Z"
+    }
+  },
+  "generator_version": 1,
+  "schema_version": 1
+}

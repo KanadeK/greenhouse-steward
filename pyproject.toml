@@ -55,6 +55,9 @@ Homepage = "https://github.com/KanadeK/greenhouse-steward"
 Issues = "https://github.com/KanadeK/greenhouse-steward/issues"
 Repository = "https://github.com/KanadeK/greenhouse-steward"
 
+[project.scripts]
+greenhouse-steward = "greenhouse_steward.cli:app"
+
 [tool.setuptools]
 package-dir = { "" = "src" }
 
@@ -66,6 +69,11 @@ greenhouse_steward = [
   "profiles/*.json",
   "sample_data/data/*.csv",
   "sample_data/data/*.json",
+  "web/static/css/*.css",
+  "web/static/js/*.js",
+  "web/static/vendor/*.js",
+  "web/static/vendor/*.md",
+  "web/templates/*.html",
 ]
 
 [tool.pytest.ini_options]

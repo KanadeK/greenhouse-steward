@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+{% block title %}Greenhouse status | Greenhouse Steward{% endblock %}
+{% block content %}
+  <header class="page-heading">
+    <div>
+      <p class="context-label">Local greenhouse evidence</p>
+      <h1>Greenhouse status</h1>
+      <p>Trusted readings, threshold evidence, trends, and safe simulation.</p>
+    </div>
+    {% if report %}
+      <div class="analysis-identity">
+        <span>{{ report.device_id }}</span>
+        <span>{{ report.profile_slug }}</span>
+        <strong>
+          {% if report.historical %}Historical replay{% else %}Live evaluation{% endif %}
+        </strong>
+      </div>
+    {% endif %}
+  </header>
+
+  {% if error %}
+    <section class="error-summary" id="error-summary" role="alert" tabindex="-1">
+      <h2>Request could not be completed</h2>
+      <p>{{ error }}</p>
+      <p>Review the selected profile, device ID, CSV schema, and timestamps.</p>
+    </section>
+  {% endif %}
+
+  <section class="source-panel" aria-labelledby="source-heading">
+    <div class="section-heading">
+      <div>
+        <p class="context-label">Data source</p>
+        <h2 id="source-heading">Analyze observations</h2>
+      </div>
+      <p>CSV imports are atomic. Historical mode evaluates at the newest row.</p>
+    </div>
+    <div class="source-grid">
+      <form
+        class="source-form"
+        method="post"
+        action="/analyses/csv"
+        enctype="multipart/form-data"
+        data-loading-form
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <h3>Upload canonical CSV</h3>
+        <div class="field">
+          <label for="csv-file">Sensor data</label>
+          <input id="csv-file" name="csv_file" type="file" accept=".csv,text/csv" required>
+          <p class="field-help">Maximum 10 MiB. UTF-8. Five canonical columns.</p>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="device-id">Device ID</label>
+            <input
+              id="device-id"
+              name="device_id"
+              value="web-upload"
+              pattern="[A-Za-z0-9][A-Za-z0-9._:-]{0,79}"
+              required
+            >
+          </div>
+          <div class="field">
+            <label for="profile-slug">Crop profile</label>
+            <select id="profile-slug" name="profile_slug">
+              {% for profile in profiles %}
+                <option value="{{ profile.slug }}"{% if profile.slug == "tomato" %} selected{% endif %}>
+                  {{ profile.display_name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field">
+            <label for="analysis-mode">Evaluation time</label>
+            <select id="analysis-mode" name="analysis_mode">
+              <option value="historical">Newest CSV timestamp</option>
+              <option value="live">Current clock</option>
+            </select>
+          </div>
+        </div>
+        <button class="button button-primary" type="submit" data-loading-label="Analyzing CSV">
+          Analyze CSV
+        </button>
+      </form>
+
+      <div class="sample-source">
+        <h3>Bundled 7-day samples</h3>
+        <p>Deterministic offline fixtures. Always shown as historical replay.</p>
+        <div class="sample-actions">
+          {% for sample in samples %}
+            <form method="post" action="/analyses/sample" data-loading-form>
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="sample_slug" value="{{ sample.slug }}">
+              <input type="hidden" name="profile_slug" value="{{ sample.profile }}">
+              <button class="button button-secondary" type="submit" data-loading-label="Loading sample">
+                {{ sample.label }}
+              </button>
+            </form>
+          {% endfor %}
+        </div>
+        <dl class="schema-list">
+          <div><dt>Timestamp</dt><dd>RFC 3339 with timezone</dd></div>
+          <div><dt>Metrics</dt><dd>temperature, humidity, soil, light</dd></div>
+          <div><dt>Acceptance</dt><dd>All rows valid or no rows stored</dd></div>
+        </dl>
+      </div>
+    </div>
+    <p class="loading-message" role="status" aria-live="polite" data-loading-status></p>
+  </section>
+
+  {% if not report %}
+    <section class="empty-state" aria-labelledby="empty-heading">
+      <p class="context-label">No analysis selected</p>
+      <h2 id="empty-heading">Start with a sample or your own CSV</h2>
+      <p>The dashboard will show current trust state, exact rule evidence, daily and weekly summaries, and export links.</p>
+    </section>
+  {% else %}
+    <section class="status-strip status-{{ report.system_mode }}" aria-labelledby="trust-heading">
+      <div>
+        <p class="context-label">Trust state</p>
+        <h2 id="trust-heading">{{ report.system_mode | upper }}</h2>
+      </div>
+      <dl>
+        <div>
+          <dt>Evaluated</dt>
+          <dd>{{ report.evaluated_at }}</dd>
+        </div>
+        <div>
+          <dt>Snapshots</dt>
+          <dd>{{ report.history_snapshot_count }}</dd>
+        </div>
+        <div>
+          <dt>Readings</dt>
+          <dd>{{ report.history_reading_count }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section aria-labelledby="readings-heading">
+      <div class="section-heading">
+        <div>
+          <p class="context-label">Newest trusted inputs</p>
+          <h2 id="readings-heading">Four current metrics</h2>
+        </div>
+        <p>{{ report.source.kind }}: {{ report.source.name }}</p>
+      </div>
+      <div class="reading-grid">
+        {% for reading in report.latest_readings %}
+          <article class="reading-cell">
+            <h3>{{ reading.label }}</h3>
+            {% if reading.available %}
+              <p class="reading-value">{{ "%.2f" | format(reading.value) }} <span>{{ reading.unit }}</span></p>
+              <p class="reading-time">{{ reading.observed_at }}</p>
+            {% else %}
+              <p class="reading-missing">No current reading</p>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="evidence-section" aria-labelledby="evidence-heading">
+      <div class="section-heading">
+        <div>
+          <p class="context-label">Why this status</p>
+          <h2 id="evidence-heading">Rule evidence</h2>
+        </div>
+        <p>{{ report.rules | length }} rule hits</p>
+      </div>
+      {% if report.rules %}
+        <div class="table-scroll" tabindex="0" aria-label="Rule evidence table">
+          <table>
+            <caption>Observed values, configured thresholds, and recommendations</caption>
+            <thead>
+              <tr>
+                <th scope="col">Metric</th>
+                <th scope="col">Observed</th>
+                <th scope="col">Threshold</th>
+                <th scope="col">Severity</th>
+                <th scope="col">Recommendation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for rule in report.rules %}
+                <tr>
+                  <th scope="row">{{ rule.metric_label }}</th>
+                  <td>
+                    {% if rule.observed_value is not none %}
+                      {{ "%.2f" | format(rule.observed_value) }} {{ rule.unit }}
+                    {% else %}
+                      Missing
+                    {% endif %}
+                  </td>
+                  <td>
+                    {{ rule.threshold.kind }}
+                    {% if rule.threshold.low is not none %} {{ rule.threshold.low }}{% endif %}
+                    {% if rule.threshold.high is not none %} {{ rule.threshold.high }}{% endif %}
+                    {% if rule.threshold.max_age_seconds is not none %}
+                      {{ rule.threshold.max_age_seconds }} seconds
+                    {% endif %}
+                  </td>
+                  <td><span class="severity severity-{{ rule.severity }}">{{ rule.severity }}</span></td>
+                  <td>{{ rule.recommendation }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="normal-message">All trusted readings are within configured thresholds.</p>
+      {% endif %}
+    </section>
+
+    <section class="trend-section" aria-labelledby="trends-heading">
+      <div class="section-heading">
+        <div>
+          <p class="context-label">Period summaries</p>
+          <h2 id="trends-heading">Daily and weekly trends</h2>
+        </div>
+        <div class="period-switch" aria-label="Trend period">
+          <button type="button" data-trend-button="daily" aria-pressed="true">Daily</button>
+          <button type="button" data-trend-button="weekly" aria-pressed="false">Weekly</button>
+        </div>
+      </div>
+      <script id="trend-plot-data" type="application/json">{{ trend_plot_json | safe }}</script>
+      <p class="chart-status" role="status" aria-live="polite" data-chart-status>
+        Accessible trend tables are available below.
+      </p>
+      <div
+        class="trend-chart"
+        data-trend-chart
+        role="img"
+        aria-label="Daily greenhouse metric means. Full values are in the following tables."
+      ></div>
+
+      <div class="trend-tables">
+        <details open data-trend-table="daily">
+          <summary>Daily values</summary>
+          {% if report.trends.daily %}
+            <div class="table-scroll" tabindex="0" aria-label="Daily trend table">
+              <table>
+                <caption>Daily minimum, maximum, mean, and sample count</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Metric</th>
+                    <th scope="col">Period</th>
+                    <th scope="col">Minimum</th>
+                    <th scope="col">Maximum</th>
+                    <th scope="col">Mean</th>
+                    <th scope="col">Samples</th>
+                    <th scope="col">Direction</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for period in report.trends.daily %}
+                    <tr>
+                      <th scope="row">{{ period.metric }}</th>
+                      <td>{{ period.period_start }}</td>
+                      <td>{{ "%.2f" | format(period.minimum) }}</td>
+                      <td>{{ "%.2f" | format(period.maximum) }}</td>
+                      <td>{{ "%.2f" | format(period.mean) }}</td>
+                      <td>{{ period.count }}</td>
+                      <td>{{ period.direction }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p>No daily periods are available.</p>
+          {% endif %}
+        </details>
+
+        <details data-trend-table="weekly">
+          <summary>Weekly values</summary>
+          {% if report.trends.weekly %}
+            <div class="table-scroll" tabindex="0" aria-label="Weekly trend table">
+              <table>
+                <caption>Weekly minimum, maximum, mean, and sample count</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Metric</th>
+                    <th scope="col">Period</th>
+                    <th scope="col">Minimum</th>
+                    <th scope="col">Maximum</th>
+                    <th scope="col">Mean</th>
+                    <th scope="col">Samples</th>
+                    <th scope="col">Direction</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for period in report.trends.weekly %}
+                    <tr>
+                      <th scope="row">{{ period.metric }}</th>
+                      <td>{{ period.period_start }}</td>
+                      <td>{{ "%.2f" | format(period.minimum) }}</td>
+                      <td>{{ "%.2f" | format(period.maximum) }}</td>
+                      <td>{{ "%.2f" | format(period.mean) }}</td>
+                      <td>{{ period.count }}</td>
+                      <td>{{ period.direction }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p>No weekly periods are available.</p>
+          {% endif %}
+        </details>
+      </div>
+    </section>
+
+    <section class="action-grid" aria-label="Exports and simulator">
+      <div class="export-panel">
+        <p class="context-label">Portable evidence</p>
+        <h2>Export analysis</h2>
+        <p>JSON contains status and evidence. CSV contains persisted sensor rows.</p>
+        <div class="button-row">
+          <a
+            class="button button-secondary"
+            href="/exports/{{ report.device_id }}.json?profile_slug={{ report.profile_slug }}&analysis_mode={{ report.analysis_mode }}"
+          >Download JSON</a>
+          <a class="button button-secondary" href="/exports/{{ report.device_id }}.csv">Download CSV</a>
+        </div>
+      </div>
+
+      <div class="relay-panel">
+        <p class="context-label">Simulator only</p>
+        <h2>Water relay</h2>
+        {% if report.historical %}
+          <p class="safety-note">Disabled for historical replay. No hardware command is available.</p>
+        {% else %}
+          <p>Server safety policy decides whether the simulator may start.</p>
+          <form method="post" action="/relay/simulations" data-loading-form>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="device_id" value="{{ report.device_id }}">
+            <input type="hidden" name="profile_slug" value="{{ report.profile_slug }}">
+            <input type="hidden" name="analysis_mode" value="{{ report.analysis_mode }}">
+            <label for="relay-seconds">Requested seconds</label>
+            <input id="relay-seconds" name="requested_seconds" type="number" min="1" max="86400" value="10">
+            <button class="button button-primary" type="submit" data-loading-label="Applying safety checks">
+              Run simulation
+            </button>
+          </form>
+        {% endif %}
+        {% if relay %}
+          <dl class="relay-state">
+            <div><dt>State</dt><dd>{{ relay.state }}</dd></div>
+            <div><dt>Applied</dt><dd>{{ relay.applied_seconds or 0 }} seconds</dd></div>
+            <div><dt>Capped</dt><dd>{{ "yes" if relay.capped else "no" }}</dd></div>
+            <div><dt>Reason</dt><dd>{{ relay.reason }}</dd></div>
+          </dl>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

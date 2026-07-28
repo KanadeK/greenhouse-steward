@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}{{ error_title }} | Greenhouse Steward{% endblock %}
+
+{% block content %}
+  <section class="error-page" aria-labelledby="error-page-title">
+    <p class="context-label">HTTP {{ status_code }}</p>
+    <h1 id="error-page-title">{{ error_title }}</h1>
+    <p>{{ error_detail }}</p>
+    <a class="button button-primary" href="/dashboard">Return to dashboard</a>
+  </section>
+{% endblock %}

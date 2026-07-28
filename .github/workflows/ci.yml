@@ -26,6 +26,7 @@ jobs:
           path: |
             coverage.xml
             artifacts/tomato-7d-report.json
+            docs/images/pages-demo.png
   platform-smoke:
     strategy:
       fail-fast: false

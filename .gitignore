@@ -8,6 +8,7 @@ build/
 dist/
 dist-release/
 artifacts/
+site/
 *.egg-info/
 *.egg
 

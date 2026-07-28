@@ -7,7 +7,7 @@ import json
 import re
 import ssl
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from math import isfinite
 from pathlib import Path
@@ -94,7 +94,7 @@ class MqttConfig:
     keepalive_seconds: int = 60
     username: str | None = None
     password: SecretStr | None = None
-    tls: MqttTlsConfig = MqttTlsConfig()
+    tls: MqttTlsConfig = field(default_factory=MqttTlsConfig)
     accept_retained: bool = False
 
     def __post_init__(self) -> None:
@@ -215,7 +215,7 @@ class PahoMqttAdapter[T]:
         readings: list[SensorReading] = []
         for metric in Metric:
             raw_value = values[metric.value]
-            if isinstance(raw_value, bool) or not isinstance(raw_value, (int, float)):
+            if isinstance(raw_value, bool) or not isinstance(raw_value, int | float):
                 raise MqttPayloadError(f"{metric.value} must be a JSON number")
             try:
                 value = float(raw_value)

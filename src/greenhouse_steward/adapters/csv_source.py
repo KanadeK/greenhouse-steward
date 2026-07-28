@@ -162,7 +162,7 @@ class StrictCsvSource:
                     raise CsvTimestampOrderError(line, previous, observed_at)
                 values = {
                     metric: _parse_number(row[index], line, metric.value)
-                    for index, metric in enumerate(Metric, start=1)
+                    for index, metric in enumerate(Metric.__members__.values(), start=1)
                 }
                 try:
                     readings = tuple(
@@ -172,7 +172,7 @@ class StrictCsvSource:
                             value=values[metric],
                             observed_at=observed_at,
                         )
-                        for metric in Metric
+                        for metric in Metric.__members__.values()
                     )
                     snapshot = ReadingSnapshot(
                         device_id=device_id,

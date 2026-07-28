@@ -162,7 +162,9 @@ class CropProfile(DomainModel):
     display_name: str = Field(min_length=1, max_length=128)
     targets: dict[Metric, NumericRange]
     watering: WateringPolicy
-    required_metrics: frozenset[Metric] = Field(default_factory=lambda: frozenset(Metric))
+    required_metrics: frozenset[Metric] = Field(
+        default_factory=lambda: frozenset(Metric.__members__.values())
+    )
 
     @field_validator("display_name")
     @classmethod
@@ -178,7 +180,7 @@ class CropProfile(DomainModel):
     def validate_profile(self) -> Self:
         """Require complete targets and internally coherent soil thresholds."""
 
-        expected = set(Metric)
+        expected: set[Metric] = set(Metric.__members__.values())
         if set(self.targets) != expected:
             missing = sorted(metric.value for metric in expected - set(self.targets))
             extra = sorted(metric.value for metric in set(self.targets) - expected)

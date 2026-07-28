@@ -7,8 +7,10 @@ clear recommendations without surrendering their sensor history. It accepts
 canonical CSV or MQTT v1 telemetry, persists locally in SQLite, and explains
 each rule hit with its observed value, threshold, and recommendation.
 
-> Screenshot is generated from the running dashboard by CI and published with
-> the build artifacts; it is intentionally not a mockup.
+![Published Pages demo generated from the bundled tomato telemetry](docs/images/pages-demo.png)
+
+> The screenshot is captured from the published Pages demo generated from the
+> bundled tomato telemetry. It contains no user data and is not a mockup.
 
 - **Understandable:** crop profiles, anomalies, stale sensors, daily/weekly
   trends, and evidence for every recommendation.

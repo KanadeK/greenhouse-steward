@@ -114,6 +114,10 @@ strict = true
 warn_unreachable = true
 pretty = true
 
+[[tool.mypy.overrides]]
+module = ["paho.mqtt", "paho.mqtt.client", "paho.mqtt.enums"]
+ignore_missing_imports = true
+
 [tool.coverage.run]
 branch = true
 source = ["greenhouse_steward"]

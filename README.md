@@ -1,113 +1,88 @@
 # Greenhouse Steward
 
-[简体中文](README.zh-CN.md)
+[简体中文](README.zh-CN.md) · [MIT](LICENSE) · **Status: v0.1.0**
 
-Greenhouse Steward is a local-first, open-source foundation for collecting
-greenhouse observations and turning them into understandable, operator-reviewed
-guidance. The project is designed for small growers, educators, and tinkerers
-who want ownership of their data and a clear explanation behind every
-recommendation.
+Local-first greenhouse monitoring for growers, classrooms, and makers who need
+clear recommendations without surrendering their sensor history. It accepts
+canonical CSV or MQTT v1 telemetry, persists locally in SQLite, and explains
+each rule hit with its observed value, threshold, and recommendation.
 
-## Project status
+> Screenshot is generated from the running dashboard by CI and published with
+> the build artifacts; it is intentionally not a mockup.
 
-Version `0.1.0` establishes the Python package, dependency policy, engineering
-checks, architecture boundaries, and community documentation. The current
-source package exposes version metadata only. It does not ingest measurements,
-serve a dashboard, generate horticultural advice, or control equipment.
+- **Understandable:** crop profiles, anomalies, stale sensors, daily/weekly
+  trends, and evidence for every recommendation.
+- **Local and portable:** no cloud account; SQLite-backed readings export as
+  CSV or JSON.
+- **Safe by default:** relay operation is simulation only, bounded by each
+  profile; ESP32 sample firmware starts with physical output disabled.
 
-Do not use this baseline to operate heating, ventilation, irrigation, lighting,
-or other physical systems. Environmental decisions remain the responsibility
-of a qualified human operator.
-
-## Intended product contract
-
-Implementation work is governed by these principles:
-
-- **Local first:** readings, configuration, and derived guidance stay on the
-  operator's machine unless the operator deliberately enables an integration.
-- **Observable inputs:** every accepted reading carries a source, timestamp,
-  unit, and validation result.
-- **Explainable guidance:** recommendations cite the readings and rules that
-  produced them; opaque scores are not sufficient.
-- **Human authority:** the application presents information and guidance. It
-  does not silently actuate greenhouse equipment.
-- **Graceful degradation:** missing, stale, or implausible measurements are
-  shown as data-quality problems rather than converted into confident advice.
-- **Portable data:** operators can inspect and export their own measurements
-  using documented formats.
-
-The intended application boundary includes MQTT and explicit manual or file
-imports, normalized measurements, local persistence, rule-based analysis, a
-FastAPI interface, and a browser dashboard. Each capability must earn its own
-tests and documentation before it is described as available.
-
-## Requirements
-
-- Python 3.12
-- A virtual environment is strongly recommended
-- A local MQTT broker is optional and relevant only after an MQTT adapter is
-  implemented
-
-All direct runtime and development dependencies are exactly pinned in
-[`pyproject.toml`](pyproject.toml). Dependency updates should be reviewed as
-deliberate changes rather than arriving implicitly during installation.
-
-## Development setup
+## Quick start
 
 ```bash
 python -m venv .venv
-python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
+greenhouse-steward analyze --sample tomato-7d --db greenhouse.sqlite3
+greenhouse-steward serve --db greenhouse.sqlite3
 ```
 
-Activate the virtual environment using the command appropriate for your shell,
-then run an individual engineering task:
+Open `http://127.0.0.1:8000/dashboard`. The server refuses non-loopback binds.
+
+## A real input → output
+
+The canonical CSV schema is:
+
+```csv
+timestamp,temperature_c,humidity_pct,soil_moisture_pct,light_lux
+2026-01-05T00:00:00Z,22.4,63.1,48.8,12400
+```
 
 ```bash
-python scripts/task.py lint
-python scripts/task.py typecheck
-python scripts/task.py test
-python scripts/task.py audit
-python scripts/task.py build
+greenhouse-steward analyze --csv readings.csv --device-id bed-a --profile tomato --db greenhouse.sqlite3
+greenhouse-steward export bed-a --format json --db greenhouse.sqlite3
 ```
 
-PowerShell users can invoke the same tasks with:
+The second command emits persisted status, rule evidence, watering safety,
+anomalies, and trends—not prebuilt output. `tomato-7d` and `herb-7d` are
+deterministic seven-day fixtures included in the package.
 
-```powershell
-.\scripts\task.ps1 lint
-```
+## Interfaces
 
-On systems with `make`, the equivalent targets are `make lint`, `make
-typecheck`, `make test`, `make audit`, `make build`, and `make quality`.
-
-These commands are release gates, not claims about the state of an unverified
-checkout. A task returning a non-zero status must be investigated before a
-release.
-
-## Repository layout
-
-```text
-.
-├── src/greenhouse_steward/  Python package
-├── scripts/                 Cross-platform engineering task entry points
-├── docs/                    Architecture, security, and release policy
-├── .github/                 Contribution and dependency-management metadata
-└── pyproject.toml           Package and tool configuration
-```
+- **CLI:** `analyze`, `profiles`, `export`, `mqtt validate`, `mqtt ingest`, and
+  `relay simulate` all call the same application layer.
+- **Web/API:** FastAPI dashboard, CSRF-protected form actions, JSON endpoints,
+  explicit error states, keyboard skip link, compact 320px layout, and local
+  Plotly assets.
+- **MQTT:** topic `greenhouse/{device_id}/telemetry`; TLS is required unless an
+  explicit loopback-only development exception is configured.
 
 ## Safety and privacy
 
-Greenhouse measurements can reveal occupancy patterns, location, crop choices,
-and operating schedules. Review
-[`docs/PRIVACY_AND_SECURITY.md`](docs/PRIVACY_AND_SECURITY.md) before connecting
-real sensors. Security reports should follow [`SECURITY.md`](SECURITY.md).
+Readings and profile-derived reports stay on the chosen machine. MQTT passwords
+are never included in validation errors or exported output. This is monitoring
+and simulation software, not a controller for pumps, heating, lighting, or
+life-safety equipment. See [privacy and security](docs/PRIVACY_AND_SECURITY.md).
 
-## Contributing
+## Development and verification
 
-Issue reports, design discussions, documentation improvements, and carefully
-tested code are welcome. Read [`CONTRIBUTING.md`](CONTRIBUTING.md) and the
-[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) before participating.
+```bash
+make verify
+make demo
+make package
+make release-check
+```
 
-## License
+Without `make`, run `python scripts/verify.py`, `python scripts/demo.py`,
+`python scripts/package_release.py`, and `python scripts/release_check.py`.
+`make demo` writes an inspectable generated report under `artifacts/`.
 
-Greenhouse Steward is available under the [MIT License](LICENSE).
+## Architecture and project notes
+
+The domain core is independent of FastAPI, Paho, SQLite, and files; adapters
+feed a shared application facade used by CLI and Web. See
+[architecture](docs/ARCHITECTURE.md), [competitor scan](docs/COMPETITOR_SCAN.md),
+[contributing](CONTRIBUTING.md), and the [release checklist](docs/RELEASE_CHECKLIST.md).
+
+Public-repository sampling found no active same-name, highly isomorphic project;
+the deliberate difference is a local, explainable rules workflow with a
+simulation-only safety boundary rather than remote fleet control.

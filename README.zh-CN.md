@@ -1,83 +1,57 @@
-# Greenhouse Steward（温室管家）
+# Greenhouse Steward
 
-[English](README.md)
+[English](README.md) · [MIT](LICENSE) · **当前状态：v0.1.0**
 
-Greenhouse Steward 是一个本地优先的开源项目基础，用于收集温室观测数据，并将数据转化为可解释、需由操作者确认的建议。项目面向小型种植者、教育工作者和创客，核心目标是让使用者掌握自己的数据，并能看懂每条建议的依据。
+面向园艺爱好者、教学场景和 Maker 的离线优先温室监测工具。它接收规范 CSV 或 MQTT v1 遥测，写入本地 SQLite，并为每条规则命中展示输入值、阈值和建议。
 
-## 当前状态
+> 截图由 CI 从实际运行的仪表盘生成并随构建产物发布；仓库不使用概念图冒充产品界面。
 
-`0.1.0` 版本建立了 Python 包、依赖策略、工程检查、架构边界和社区文档。目前源码包仅提供版本元数据；尚不具备采集测量值、提供仪表盘、生成园艺建议或控制设备的能力。
+- **可解释：** 作物 profile、异常/掉线、日周趋势和逐条规则证据。
+- **本地可携：** 不需要云账号；读数和报告可导出为 CSV 或 JSON。
+- **安全默认：** 继电器仅作内存模拟并遵守 profile 时长上限；ESP32 示例默认关闭实体输出。
 
-请勿使用这一基础版本操作供暖、通风、灌溉、照明或其他实体系统。所有环境决策均应由具备相应能力的人类操作者负责。
-
-## 预期产品约束
-
-后续实现必须遵守以下原则：
-
-- **本地优先：** 读数、配置和派生建议默认保存在操作者自己的设备上；只有操作者主动启用集成时才可向外发送。
-- **输入可追溯：** 每条有效读数都应带有来源、时间戳、单位和校验结果。
-- **建议可解释：** 每条建议应说明所依据的读数和规则，不能只给出无法解释的评分。
-- **人类保有决定权：** 应用负责展示信息与建议，不得静默驱动温室设备。
-- **异常可见：** 对缺失、过期或明显不合理的测量值，应显示数据质量问题，而不是给出看似确定的建议。
-- **数据可迁移：** 操作者能够用有文档说明的格式检查并导出自己的测量数据。
-
-预期应用边界包括 MQTT 及明确触发的手工或文件导入、标准化测量数据、本地持久化、规则分析、FastAPI 接口和浏览器仪表盘。每项能力都必须先具备对应测试和文档，才能在项目说明中列为可用功能。
-
-## 环境要求
-
-- Python 3.12
-- 强烈建议使用虚拟环境
-- 本地 MQTT 代理为可选项，且只有在 MQTT 适配器实现后才有实际用途
-
-所有直接运行时依赖和开发依赖都在 [`pyproject.toml`](pyproject.toml) 中精确锁定版本。更新依赖时应单独审查，不应在安装过程中隐式漂移。
-
-## 开发环境
+## 最快开始
 
 ```bash
 python -m venv .venv
-python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
+greenhouse-steward analyze --sample tomato-7d --db greenhouse.sqlite3
+greenhouse-steward serve --db greenhouse.sqlite3
 ```
 
-激活虚拟环境后，可运行单项工程任务：
+在浏览器打开 `http://127.0.0.1:8000/dashboard`；服务拒绝非回环地址绑定。
+
+## 真实输入 → 真实输出
+
+```csv
+timestamp,temperature_c,humidity_pct,soil_moisture_pct,light_lux
+2026-01-05T00:00:00Z,22.4,63.1,48.8,12400
+```
 
 ```bash
-python scripts/task.py lint
-python scripts/task.py typecheck
-python scripts/task.py test
-python scripts/task.py audit
-python scripts/task.py build
+greenhouse-steward analyze --csv readings.csv --device-id bed-a --profile tomato --db greenhouse.sqlite3
+greenhouse-steward export bed-a --format json --db greenhouse.sqlite3
 ```
 
-PowerShell 用户可以使用同一套任务：
+输出来自已持久化数据，包含状态、规则证据、浇水安全判断、异常和趋势，并非固定 JSON。包内含可复现的 `tomato-7d` 与 `herb-7d` 七天样例。
 
-```powershell
-.\scripts\task.ps1 lint
+## 接口与边界
+
+- CLI：`analyze`、`profiles`、`export`、`mqtt validate`、`mqtt ingest`、`relay simulate` 复用同一应用层。
+- Web/API：FastAPI 仪表盘、CSRF 表单、JSON API、键盘跳转链接、320px 响应式布局和本地 Plotly 资源。
+- MQTT：主题为 `greenhouse/{device_id}/telemetry`；除明确的回环开发例外外要求 TLS。
+
+读数和导出留在本机，密码不会出现在验证错误或报告中。本项目不是水泵、加热、照明或生命安全设备的实体控制器。请阅读[隐私与安全](docs/PRIVACY_AND_SECURITY.md)。
+
+## 验证与文档
+
+```bash
+make verify
+make demo
+make package
+make release-check
 ```
 
-安装了 `make` 的环境可使用 `make lint`、`make typecheck`、`make test`、`make audit`、`make build` 和 `make quality`。
+无 `make` 时，依次运行 `python scripts/verify.py`、`python scripts/demo.py`、`python scripts/package_release.py`、`python scripts/release_check.py`。架构、竞品抽样、贡献方式和发布检查分别见 [docs](docs/)。
 
-这些命令定义的是发布门槛，并不代表未经验证的检出版本已经通过检查。任何非零退出状态都应在发布前查明原因。
-
-## 仓库结构
-
-```text
-.
-├── src/greenhouse_steward/  Python 包
-├── scripts/                 跨平台工程任务入口
-├── docs/                    架构、安全和发布策略
-├── .github/                 贡献流程与依赖管理配置
-└── pyproject.toml           包与工具配置
-```
-
-## 安全与隐私
-
-温室测量数据可能暴露人员活动规律、位置、作物选择和运营时间。连接真实传感器前，请阅读 [`docs/PRIVACY_AND_SECURITY.md`](docs/PRIVACY_AND_SECURITY.md)。安全问题请按 [`SECURITY.md`](SECURITY.md) 中的流程报告。
-
-## 参与贡献
-
-欢迎提交问题报告、设计讨论、文档改进以及经过认真测试的代码。参与前请阅读 [`CONTRIBUTING.md`](CONTRIBUTING.md) 和 [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md)。
-
-## 许可证
-
-Greenhouse Steward 采用 [MIT License](LICENSE) 开源。
+公开仓库抽样未发现同名且高度同构的活跃项目；本项目明确差异是本地可解释规则工作流与只模拟的安全边界，而非远程设备控制。

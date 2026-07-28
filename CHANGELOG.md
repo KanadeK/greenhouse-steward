@@ -14,19 +14,21 @@ documentation are ready for a tagged release.
 
 ### Added
 
-- Python 3.12 source-package foundation with a single authoritative version.
-- Exact direct dependency pins for the intended web, MQTT, validation,
-  visualization, command-line, and HTTP boundaries.
-- Ruff, mypy, pytest, coverage, package-build, and dependency-audit task wiring.
-- English and Simplified Chinese project documentation.
-- Architecture, privacy, security, contribution, and release policies.
-- GitHub issue forms, pull-request guidance, and Dependabot configuration.
+- Local CSV and MQTT v1 ingestion with strict validation, deterministic bundled
+  tomato and herb seven-day samples, and SQLite persistence.
+- Explainable crop-profile rules, anomaly/stale-data safety states, daily and
+  weekly trends, and an explicitly simulated, duration-capped relay.
+- FastAPI dashboard/API plus CLI paths for analysis, export, MQTT validation,
+  and safe relay simulation; ESP32 synthetic firmware remains hardware-off by
+  default.
+- Integration and user-entry end-to-end coverage alongside Ruff, mypy, pytest,
+  coverage, package build, and dependency-audit task wiring.
 
 ### Safety boundary
 
-- This version establishes project governance and engineering structure. It
-  does not provide a greenhouse runtime, advice engine, dashboard, or equipment
-  control.
+- Hardware actuation is never enabled by this release. Relay behaviour is an
+  in-memory simulation with a profile safety cap; operators remain responsible
+  for physical greenhouse decisions.
 
 [Unreleased]: https://github.com/KanadeK/greenhouse-steward/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/KanadeK/greenhouse-steward/releases/tag/v0.1.0

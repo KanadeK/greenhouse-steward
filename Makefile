@@ -1,7 +1,7 @@
 PYTHON ?= python
 TASK_RUNNER := $(PYTHON) scripts/task.py
 
-.PHONY: help format lint typecheck test audit build quality
+.PHONY: help format lint typecheck test audit build quality verify demo package release-check
 
 help:
 	@$(TASK_RUNNER) --help
@@ -26,3 +26,15 @@ build:
 
 quality:
 	@$(TASK_RUNNER) quality
+
+verify:
+	@$(PYTHON) scripts/verify.py
+
+demo:
+	@$(PYTHON) scripts/demo.py
+
+package:
+	@$(PYTHON) scripts/package_release.py
+
+release-check:
+	@$(PYTHON) scripts/release_check.py

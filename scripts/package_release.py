@@ -33,7 +33,7 @@ def main() -> int:
         if source.is_dir():
             shutil.make_archive(str(target), "zip", ROOT, name)
         elif source.is_file():
-            shutil.copy2(source, target.with_suffix(source.suffix))
+            shutil.copy2(source, target)
     artifacts = sorted(path for path in DIST.iterdir() if path.is_file())
     (DIST / "SHA256SUMS.txt").write_text(
         "".join(f"{_hash(path)}  {path.name}\\n" for path in artifacts), encoding="utf-8"

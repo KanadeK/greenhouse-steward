@@ -11,7 +11,7 @@ def main() -> int:
         ("-m", "ruff", "format", "--check", "."),
         ("-m", "ruff", "check", "."),
         ("-m", "mypy", "src"),
-        ("-m", "pytest", "-q"),
+        ("-m", "pytest", "-q", "--basetemp=.pytest-tmp-verify"),
         ("-m", "build"),
     )
     for command in commands:

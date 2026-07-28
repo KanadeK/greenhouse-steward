@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -9,8 +10,21 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _git_environment() -> dict[str, str]:
+    environment = os.environ.copy()
+    environment["GIT_CONFIG_COUNT"] = "1"
+    environment["GIT_CONFIG_KEY_0"] = "safe.directory"
+    environment["GIT_CONFIG_VALUE_0"] = str(ROOT)
+    return environment
+
+
 def _command(*arguments: str) -> str:
-    return subprocess.check_output(arguments, cwd=ROOT, text=True).strip()
+    return subprocess.check_output(
+        arguments,
+        cwd=ROOT,
+        env=_git_environment(),
+        text=True,
+    ).strip()
 
 
 def main() -> int:
@@ -32,9 +46,12 @@ def main() -> int:
             "TODO|FIXME|NotImplemented|placeholder|coming soon|lorem ipsum",
             "--",
             ":!docs/ROADMAP.md",
+            ":!scripts/release_check.py",
+            ":!src/greenhouse_steward/web/static/vendor/**",
         ],
         cwd=ROOT,
         check=False,
+        env=_git_environment(),
     )
     if markers.returncode == 0:
         return 1

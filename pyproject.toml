@@ -27,17 +27,17 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-  "fastapi==0.139.2",
+  "fastapi==0.141.1",
   "httpx==0.28.1",
   "jinja2==3.1.6",
   "paho-mqtt==2.1.0",
-  "plotly==6.9.0",
-  "pydantic==2.13.4",
+  "plotly==7.1.0",
+  "pydantic==2.13.5",
   "python-multipart==0.0.32",
   "rich==15.0.0",
-  "typer==0.27.0",
-  "tzdata==2026.3",
-  "uvicorn==0.51.0",
+  "typer==0.27.2",
+  "tzdata==2026.4",
+  "uvicorn==0.53.0",
 ]
 
 [project.optional-dependencies]
